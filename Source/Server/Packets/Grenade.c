@@ -10,7 +10,7 @@
 #include <Util/Utlist.h>
 #include <math.h>
 
-void send_grenade(server_t* server, uint8_t player_id, float fuse, vector3f_t position, vector3f_t velocity)
+void send_grenade(server_t* server, player_t* player, float fuse, vector3f_t position, vector3f_t velocity)
 {
     if (server->protocol.num_players == 0) {
         return;
@@ -18,7 +18,7 @@ void send_grenade(server_t* server, uint8_t player_id, float fuse, vector3f_t po
     ENetPacket* packet = enet_packet_create(NULL, 30, ENET_PACKET_FLAG_RELIABLE);
     stream_t    stream = {packet->data, packet->dataLength, 0};
     stream_write_u8(&stream, PACKET_TYPE_GRENADE_PACKET);
-    stream_write_u8(&stream, player_id);
+    stream_write_u8(&stream, player->id);
     stream_write_f(&stream, fuse);
     stream_write_f(&stream, position.x);
     stream_write_f(&stream, position.y);
@@ -26,22 +26,21 @@ void send_grenade(server_t* server, uint8_t player_id, float fuse, vector3f_t po
     stream_write_f(&stream, velocity.x);
     stream_write_f(&stream, velocity.y);
     stream_write_f(&stream, velocity.z);
-    if (send_packet_except_sender(server, packet, player_id) == 0) {
+    if (send_packet_except_sender(server, packet, player) == 0) {
         enet_packet_destroy(packet);
     }
 }
 
-void receive_grenade_packet(server_t* server, uint8_t player_id, stream_t* data)
+void receive_grenade_packet(server_t* server, player_t* player, stream_t* data)
 {
     uint8_t ID = stream_read_u8(data);
-    if (player_id != ID) {
-        LOG_WARNING("Assigned ID: %d doesnt match sent ID: %d in grenade packet", player_id, ID);
+    if (player->id != ID) {
+        LOG_WARNING("Assigned ID: %d doesnt match sent ID: %d in grenade packet", player->id, ID);
     }
 
-    player_t* player = &server->player[player_id];
     if (player->primary_fire && player->item == 1) {
-        send_server_notice(server, player_id, 0, "InstaSuicideNade detected. Grenade ineffective");
-        send_message_to_staff(server, 0, "Player %s (#%hhu) tried to use InstaSpadeNade", player->name, player_id);
+        send_server_notice(player, 0, "InstaSuicideNade detected. Grenade ineffective");
+        send_message_to_staff(server, 0, "Player %s (#%hhu) tried to use InstaSpadeNade", player->name, player->id);
         return;
     }
 
@@ -51,8 +50,8 @@ void receive_grenade_packet(server_t* server, uint8_t player_id, stream_t* data)
     {
         return;
     }
-    grenade_t* grenade = malloc(sizeof(grenade_t));
     if (player->grenades > 0) {
+        grenade_t* grenade = malloc(sizeof(grenade_t));
         grenade->fuse       = stream_read_f(data);
         grenade->position.x = stream_read_f(data);
         grenade->position.y = stream_read_f(data);
@@ -75,15 +74,10 @@ void receive_grenade_packet(server_t* server, uint8_t player_id, stream_t* data)
             velocity.y       = ((velocity.y * lenghtNorm) * 2) + player->movement.velocity.y;
             velocity.z       = ((velocity.z * lenghtNorm) * 2) + player->movement.velocity.z;
         }
-        vector3f_t posZ1 = grenade->position;
-        posZ1.z += 1;
-        vector3f_t posZ2 = grenade->position;
-        posZ2.z += 2;
         if (valid_pos_v3f(server, grenade->position) ||
-            (valid_pos_v3f(server, posZ1) && player->movement.position.z < 0) ||
-            (valid_pos_v3f(server, posZ2) && player->movement.position.z < 0))
+            (valid_pos_v3f_below_z(server, grenade->position) && player->movement.position.z < 0))
         {
-            send_grenade(server, player_id, grenade->fuse, grenade->position, grenade->velocity);
+            send_grenade(server, player, grenade->fuse, grenade->position, grenade->velocity);
             grenade->sent            = 1;
             grenade->time_since_sent = get_nanos();
         }

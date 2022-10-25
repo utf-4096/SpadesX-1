@@ -1,7 +1,13 @@
-<img align="right" width="300" height="300" src="docs/SpadesX-Logo.png">
-
 # SpadesX
-SpadesX is a C implementation for an Ace of Spades server that supports the protocol 0.75. C was chosen because of its speed and the need for low latency in FPS games when modding the server as well as when scaling up.
+[![Build Status](
+https://github.com/SpadesX/SpadesX/actions/workflows/cmake.yml/badge.svg)
+](https://github.com/SpadesX/SpadesX/actions/workflows/cmake.yml)
+
+[![SpadesX Logo](docs/SpadesX-Logo-small.png)](https://spadesx.org)
+
+SpadesX is a C implementation for an Ace of Spades server that supports the protocol 0.75.
+
+C was chosen because of its speed and the need for low latency in FPS games when modding the server as well as when scaling up.
 
 ## Why "SpadesX"?
 We just one day decided to brainstorm the name and ended up on something that sounded cool yet still had the original naming.
@@ -23,8 +29,6 @@ Ubuntu 20.04 doesnt have the latest version of json-c and since SpadesX uses som
 
 > cd SpadesX
 
-> git submodule init && git submodule update
-
 > mkdir build && cd build
  
 > cmake ..
@@ -36,6 +40,7 @@ You can use mingw, but you'll still have to install the libraries first.
 
 ## Contribute
 If you would like to contribute bug fixes, improvements, and new features please take a look at our [Contributor Guide](CONTRIBUTING.md) to see how you can participate in this open source project.
+
 You can also contact us via the official [Discord server][discord].
 
 ## Statistics
@@ -52,3 +57,4 @@ Check the [Contributor List](CONTRIBUTORS.md) for a list of the people that help
 [GNU General Public License v3.0](LICENSE)
 
 [discord]: https://discord.gg/dsRjTzJpZC
+[build]: https://github.com/SpadesX/SpadesX/actions/workflows/cmake.yml
