@@ -27,6 +27,7 @@ http://moonedit.com/tom/vox1_en.htm#genland
 // #include "constants_c.h"
 #include <libmapvxl.h>
 #include <math.h>
+#include <Server/Classicgen.h>
 
 #define PI 3.141592653589793f
 #define VXL_MAX_SIZE 512 // maximum .VXL dimensions in both x & y direction
@@ -197,13 +198,13 @@ static inline int get_lowest_height(mapvxl_t* map, int x, int y)
     // clang-format on
 }
 
-void genland(unsigned int seed, mapvxl_t* map)
+void genland(classicgen_opt_t options, mapvxl_t* map)
 {
     double dx, dy, d, g, g2, river, amplut[OCTMAX], samp[3], csamp[3];
     double nx, ny, nz, gr, gg, gb;
     int    i, x, y, k, o, maxa, msklut[OCTMAX];
 
-    set_seed(seed);
+    set_seed(options.seed);
 
     noiseinit();
 
@@ -248,23 +249,23 @@ void genland(unsigned int seed, mapvxl_t* map)
             ny *= d;
             nz *= d;
 
-            gr = 140;
-            gg = 125;
-            gb = 115; // Ground
+            gr = options.color_ground.r;
+            gg = options.color_ground.g;
+            gb = options.color_ground.b; // Ground
             g  = min(
             max(max(-nz, 0) * 1.4 - csamp[0] / 32.0 + noise3d(x * (1.0 / 64.0), y * (1.0 / 64.0), .3, 15) * .3, 0), 1);
-            gr += (72 - gr) * g;
-            gg += (80 - gg) * g;
-            gb += (32 - gb) * g; // Grass
+            gr += (options.color_grass1.r - gr) * g;
+            gg += (options.color_grass1.g - gg) * g;
+            gb += (options.color_grass1.b - gb) * g; // Grass
             g2 = (1 - fabs(g - .5) * 2) * .7;
-            gr += (68 - gr) * g2;
-            gg += (78 - gg) * g2;
-            gb += (40 - gb) * g2; // Grass2
+            gr += (options.color_grass2.r - gr) * g2;
+            gg += (options.color_grass2.g - gg) * g2;
+            gb += (options.color_grass2.b - gb) * g2; // Grass2
             g2 = max(min((samp[0] - csamp[0]) * 1.5, 1), 0);
             g  = 1 - g2 * .2;
-            gr += (60 * g - gr) * g2;
-            gg += (100 * g - gg) * g2;
-            gb += (120 * g - gb) * g2; // Water
+            gr += (options.color_water.r * g - gr) * g2;
+            gg += (options.color_water.g * g - gg) * g2;
+            gb += (options.color_water.b * g - gb) * g2; // Water
 
             d        = .3;
             amb[k].r = (unsigned char) min(max(gr * d, 0), 255);

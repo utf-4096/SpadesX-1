@@ -46,6 +46,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <Server/Classicgen.h>
 
 server_t        server;
 pthread_mutex_t server_lock;
@@ -129,8 +130,6 @@ static void _server_init(server_t*   server,
     int         team2_end[2];
     int         fog_color[3];
     int         map_size[3];
-    int         classicgen;
-    int         seed;
     const char* author;
 
     READ_INT_ARR_FROM_JSON(parsed_map_json, team1_start, team1_start, "team1 start", ((int[]){0, 0}), 2, 0)
@@ -139,15 +138,50 @@ static void _server_init(server_t*   server,
     READ_INT_ARR_FROM_JSON(parsed_map_json, team2_end, team2_end, "team2 end", ((int[]){30, 30}), 2, 0)
     READ_INT_ARR_FROM_JSON(parsed_map_json, fog_color, fog_color, "fog color", ((int[]){128, 232, 255}), 3, 0)
     READ_INT_ARR_FROM_JSON(parsed_map_json, map_size, map_size, "map size", ((int[]){512, 512, 64}), 3, 1)
-    READ_INT_FROM_JSON(parsed_map_json, classicgen, classicgen, "classicgen", 0, 0)
-    READ_INT_FROM_JSON(parsed_map_json, seed, seed, "classicgen seed", rand(), 0)
     READ_STR_FROM_JSON(parsed_map_json, author, author, "author", "Unknown", 0)
     (void) author;
 
+    struct json_object* classicgen_obj;
+    classicgen_obj = json_object_object_get(parsed_map_json, "classicgen");
+
+    classicgen_opt_t classicgen_options;
+    // classicgen options
+    if(classicgen_obj) {
+        int seed;
+        int ground_color[3];
+        int grass1_color[3];
+        int grass2_color[3];
+        int water_color[3];
+
+        READ_INT_FROM_JSON(classicgen_obj, seed, seed, "classicgen seed", rand(), 0)
+        READ_INT_ARR_FROM_JSON(classicgen_obj, ground_color, ground_color, "classicgen ground color", ((int[]){140, 125, 115}), 3, 1)
+        READ_INT_ARR_FROM_JSON(classicgen_obj, grass1_color, grass1_color, "classicgen grass1 color", ((int[]){72, 80, 32}), 3, 1)
+        READ_INT_ARR_FROM_JSON(classicgen_obj, grass2_color, grass2_color, "classicgen grass2 color", ((int[]){68, 78, 40}), 3, 1)
+        READ_INT_ARR_FROM_JSON(classicgen_obj, water_color, water_color, "classicgen water color", ((int[]){60, 100, 120}), 3, 1)
+
+        classicgen_options.seed = seed;
+
+        classicgen_options.color_ground.r = ground_color[0];
+        classicgen_options.color_ground.g = ground_color[1];
+        classicgen_options.color_ground.b = ground_color[2];
+
+        classicgen_options.color_grass1.r = grass1_color[0];
+        classicgen_options.color_grass1.g = grass1_color[1];
+        classicgen_options.color_grass1.b = grass1_color[2];
+
+        classicgen_options.color_grass2.r = grass2_color[0];
+        classicgen_options.color_grass2.g = grass2_color[1];
+        classicgen_options.color_grass2.b = grass2_color[2];
+
+        classicgen_options.color_water.r  = water_color[0];
+        classicgen_options.color_water.g  = water_color[1];
+        classicgen_options.color_water.b  = water_color[2];
+    }
+
     json_object_put(parsed_map_json);
 
-    if(classicgen == 1) {
-        if(map_classicgen(server, seed) == 0) {
+    if(classicgen_obj) {
+        if(map_classicgen(server, classicgen_options) == 0) {
             return;
         }        
     } else {

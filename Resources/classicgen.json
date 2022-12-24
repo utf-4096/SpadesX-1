@@ -1,16 +1,21 @@
 {
-	"classicgen": 1,
+	"classicgen": {
+		"ground_color": [140, 125, 115],
+		"grass1_color": [72, 80, 32],
+		"grass2_color": [68, 78, 40],
+		"water_color": [60, 100, 115]
+	},
 	"team1_start": [
 		0,
 		0
 	],
 	"team1_end": [
 		240,
-		240
+		511
 	],
 	"team2_start": [
 		260,
-		260
+		0
 	],
 	"team2_end": [
 		511,

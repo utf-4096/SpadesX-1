@@ -95,7 +95,7 @@ uint8_t map_load(server_t* server, const char* path, int map_size[3])
     return 1;
 }
 
-uint8_t map_classicgen(server_t* server, int seed)
+uint8_t map_classicgen(server_t* server, classicgen_opt_t options)
 {
     LOG_STATUS("Generating classicgen");
 
@@ -108,7 +108,7 @@ uint8_t map_classicgen(server_t* server, int seed)
     }
 
     mapvxl_create(&server->s_map.map, 512, 512, 64);
-    genland(seed, &server->s_map.map);
+    genland(options, &server->s_map.map);
     LOG_STATUS("Finished map generation");
 
     uint8_t* mapOut = (uint8_t*) calloc(
