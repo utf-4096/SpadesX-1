@@ -7,5 +7,6 @@
 #include <Util/Types.h>
 
 uint8_t map_load(server_t* server, const char* path, int map_size[3]);
+uint8_t map_classicgen(server_t* server, int seed);
 
 #endif

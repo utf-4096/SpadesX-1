@@ -129,6 +129,8 @@ static void _server_init(server_t*   server,
     int         team2_end[2];
     int         fog_color[3];
     int         map_size[3];
+    int         classicgen;
+    int         seed;
     const char* author;
 
     READ_INT_ARR_FROM_JSON(parsed_map_json, team1_start, team1_start, "team1 start", ((int[]){0, 0}), 2, 0)
@@ -137,13 +139,21 @@ static void _server_init(server_t*   server,
     READ_INT_ARR_FROM_JSON(parsed_map_json, team2_end, team2_end, "team2 end", ((int[]){30, 30}), 2, 0)
     READ_INT_ARR_FROM_JSON(parsed_map_json, fog_color, fog_color, "fog color", ((int[]){128, 232, 255}), 3, 0)
     READ_INT_ARR_FROM_JSON(parsed_map_json, map_size, map_size, "map size", ((int[]){512, 512, 64}), 3, 1)
+    READ_INT_FROM_JSON(parsed_map_json, classicgen, classicgen, "classicgen", 0, 0)
+    READ_INT_FROM_JSON(parsed_map_json, seed, seed, "classicgen seed", rand(), 0)
     READ_STR_FROM_JSON(parsed_map_json, author, author, "author", "Unknown", 0)
     (void) author;
 
     json_object_put(parsed_map_json);
 
-    if (map_load(server, vxl_map, map_size) == 0) {
-        return;
+    if(classicgen == 1) {
+        if(map_classicgen(server, seed) == 0) {
+            return;
+        }        
+    } else {
+        if (map_load(server, vxl_map, map_size) == 0) {
+            return;
+        }
     }
 
     vector3i_t team1_start_range = {team1_start[0], team1_start[1], 1};

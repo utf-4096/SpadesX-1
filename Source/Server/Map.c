@@ -9,6 +9,7 @@
 #include <libmapvxl/libmapvxl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <Server/Classicgen.h>
 
 uint8_t map_load(server_t* server, const char* path, int map_size[3])
 {
@@ -91,5 +92,54 @@ uint8_t map_load(server_t* server, const char* path, int map_size[3])
     while (server->s_map.compressed_map) {
         server->s_map.compressed_map = queue_pop(server->s_map.compressed_map);
     }
+    return 1;
+}
+
+uint8_t map_classicgen(server_t* server, int seed)
+{
+    LOG_STATUS("Generating classicgen");
+
+    if (server->s_map.map.blocks != NULL) {
+        mapvxl_free(&server->s_map.map);
+    }
+
+    while (server->s_map.compressed_map) {
+        server->s_map.compressed_map = queue_pop(server->s_map.compressed_map);
+    }
+
+    mapvxl_create(&server->s_map.map, 512, 512, 64);
+    genland(seed, &server->s_map.map);
+    LOG_STATUS("Finished map generation");
+
+    uint8_t* mapOut = (uint8_t*) calloc(
+    server->s_map.map.size_x * server->s_map.map.size_y * (server->s_map.map.size_z / 2), sizeof(uint8_t));
+
+    LOG_STATUS("Compressing map data");
+    // Write map to mapOut
+    server->s_map.map_size = mapvxl_write(&server->s_map.map, mapOut);
+
+    // Resize the map to the exact VXL memory size for given XYZ coordinate size
+    uint8_t* oldMapOut;
+    oldMapOut = (uint8_t*) realloc(mapOut, server->s_map.map_size);
+    if (!oldMapOut) {
+        free(mapOut);
+        return 0;
+    }
+    mapOut = oldMapOut;
+
+    server->s_map.compressed_map = compress_queue(mapOut, server->s_map.map_size, DEFAULT_COMPRESS_CHUNK_SIZE);
+    free(mapOut);
+
+    queue_t* node                 = server->s_map.compressed_map;
+    server->s_map.compressed_size = 0;
+    while (node) {
+        server->s_map.compressed_size += node->length;
+        node = node->next;
+    }
+
+    while (server->s_map.compressed_map) {
+        server->s_map.compressed_map = queue_pop(server->s_map.compressed_map);
+    }
+
     return 1;
 }

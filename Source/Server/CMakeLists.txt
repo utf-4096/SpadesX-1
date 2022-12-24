@@ -104,6 +104,7 @@ set(SERVER_HEADERS
     Ping.h
     ParseConvert.h
     Player.h
+    Classicgen.h
 )
 
 set(SERVER_SOURCES
@@ -122,6 +123,7 @@ set(SERVER_SOURCES
     Ping.c
     ParseConvert.c
     Player.c
+    Classicgen.c
 )
 
 target_sources(Server

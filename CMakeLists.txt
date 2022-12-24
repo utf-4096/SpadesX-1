@@ -84,3 +84,7 @@ endif()
 if (NOT EXISTS ${CMAKE_BINARY_DIR}/Border_Hallway.json)
 configure_file(${PROJECT_SOURCE_DIR}/Resources/Border_Hallway.json ${CMAKE_BINARY_DIR}/Border_Hallway.json COPYONLY)
 endif()
+
+if (NOT EXISTS ${CMAKE_BINARY_DIR}/classicgen.json)
+configure_file(${PROJECT_SOURCE_DIR}/Resources/classicgen.json ${CMAKE_BINARY_DIR}/classicgen.json COPYONLY)
+endif()
