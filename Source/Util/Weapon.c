@@ -1,6 +1,7 @@
 #include <Server/Structs/PlayerStruct.h>
 #include <Util/Enums.h>
 #include <Util/Weapon.h>
+#include <Util/Log.h>
 
 void set_default_player_ammo(player_t* player)
 {
@@ -38,6 +39,25 @@ void set_default_player_ammo_reserve(player_t* player)
         case WEAPON_SHOTGUN:
             player->weapon_reserve = 48;
             break;
+    }
+}
+
+inline void set_default_player_pellets(player_t* player)
+{
+    uint8_t pellets = 0;
+    switch (player->weapon) {
+        case WEAPON_RIFLE:
+        case WEAPON_SMG:
+            pellets = 1;
+            break;
+        case WEAPON_SHOTGUN:
+            pellets = 8;
+            break;
+    }
+
+    if(player->weapon_pellets != pellets) {
+        LOG_DEBUG("for_players: pellets reset for %s (#%hhu)", player->name, player->id);
+        player->weapon_pellets = pellets;
     }
 }
 

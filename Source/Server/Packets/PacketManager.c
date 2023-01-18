@@ -7,6 +7,8 @@
 #include <Util/Uthash.h>
 #include <Util/Utlist.h>
 
+uint64_t last;
+
 inline uint8_t allow_shot(server_t*  server,
                           player_t*  player,
                           player_t*  player_hit,
@@ -24,12 +26,7 @@ inline uint8_t allow_shot(server_t*  server,
     if (player->primary_fire &&
         ((player->item == TOOL_SPADE &&
           diff_is_older_then(time_now, &player->timers.since_last_shot, NANO_IN_MILLI * 100)) ||
-         (player->item == TOOL_GUN && player->weapon == WEAPON_RIFLE &&
-          diff_is_older_then(time_now, &player->timers.since_last_shot, NANO_IN_MILLI * 500)) ||
-         (player->item == TOOL_GUN && player->weapon == WEAPON_SMG &&
-          diff_is_older_then(time_now, &player->timers.since_last_shot, NANO_IN_MILLI * 100)) ||
-         (player->item == TOOL_GUN && player->weapon == WEAPON_SHOTGUN &&
-          diff_is_older_then(time_now, &player->timers.since_last_shot, NANO_IN_MILLI * 1000))) &&
+          (player->item == TOOL_GUN && player->weapon_pellets != 0)) &&
         player->alive && player_hit->alive && (player->team != player_hit->team || player->allow_team_killing) &&
         (player->allow_killing && server->global_ak) && physics_validate_hit(shot_pos, shot_orien, hit_pos, 5) &&
         (physics_cast_ray(server,
@@ -56,7 +53,10 @@ inline uint8_t allow_shot(server_t*  server,
                           z) == 0))
     {
         ret = 1;
+        LOG_DEBUG("allow_shot ok: %s (#%hhu) pellets=%u target_hp=%i dt=%llums", player->name, player->id, player->weapon_pellets, player_hit->hp, (time_now - last) / NANO_IN_MILLI);
+        last = time_now;
     }
+
     return ret;
 }
 
