@@ -5,6 +5,20 @@
 #include <Server/Structs/ServerStruct.h>
 #include <libmapvxl/libmapvxl.h>
 
+typedef enum {
+    ROLE_TRUSTED     = 1,  // 00000001
+    ROLE_GUARD       = 2,  // 00000010
+    ROLE_MOD         = 4,  // 00000100
+    ROLE_ADMIN       = 8,  // 00001000
+    ROLE_MANAGER     = 16, // 00010000
+
+    PERM_ANY         = 0,  // 00000000
+    PERM_MIN_TRUSTED = 31, // 00011111
+    PERM_MIN_GUARD   = 30, // 00011110
+    PERM_MIN_MOD     = 28, // 00011100
+    PERM_MIN_ADMIN   = 24  // 00011000
+} command_permission_t;
+
 uint8_t player_has_permission(player_t* player, uint8_t console, uint32_t permission);
 void    command_handle(server_t* server, player_t* player, char* message, uint8_t console);
 void    command_populate_all(server_t* server);
